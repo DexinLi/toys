@@ -23,8 +23,6 @@
 (define form-of cdr)
 (define table-of car)
 
-
-
 (define look-up
   (lambda (var env)
     (define look-up-help
@@ -55,8 +53,8 @@
      ((eq? (caar exp) 'lambda)
       (interp0 (body-of exp) (extend-env (formals-of exp) (interp(cadr exp))env)))
      (else (let ((v1 (interp0 (car exp)env))
-                 (v2 (cdr exp)))
-             (interp0 (cons (form-of v1) (interp v2)) (table-of v1)))))))
+                 (v2 (second exp)))
+             (interp0 (list (form-of v1) (interp v2)) (table-of v1)))))))
 
 
 (define closure cons)
@@ -81,4 +79,5 @@
 
 
 ;;==============test======================
-(interp '((lambda(x)(cons x '()))'x))
+;;(interp '((lambda(x)(cons x '()))'x))
+(interp '((((lambda(x)(lambda(y)(lambda(x) x)))1)2)3))
