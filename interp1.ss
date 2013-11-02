@@ -80,4 +80,4 @@
 
 ;;==============test======================
 ;;(interp '((lambda(x)(cons x '()))'x))
-(interp '((((lambda(x)(lambda(y)(lambda(x) x)))1)2)3))
+;;(interp '((((lambda(x)(lambda(y)(lambda(x) x)))1)2)3))
