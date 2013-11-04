@@ -17,8 +17,7 @@
 	(cond
 	 ((list? x)(*application exp env))
 	 ((eq? 'lambda x) (closure exp env))
-         ((eq? x 'quote)exp)
-	 (else (atom-to-action x exp env)))))
+     	 (else (atom-to-action x exp env)))))
      (else (atom-to-value exp env)))))
 (define interp
   (lambda (exp)
@@ -33,6 +32,7 @@
      ((eq? x '=)(= (interp0(second exp)env) (interp0(third exp)env)))
      ((eq? x '<)(< (interp0(second exp)env) (interp0(third exp)env)))
      ((eq? x '>)(> (interp0(second exp)env) (interp0(third exp)env)))
+     ((eq? x 'quote)exp)
      ((eq? x 'number?)(number?(interp0 (second exp) env)))
      ((eq? x 'eq?)(eq? (interp0(second exp)env) (interp0(third exp)env)))
      ((eq? x 'cond)(ev-cond (cdr exp)env))
@@ -84,20 +84,20 @@
       (cond
        ((list? y)
         (cond
-	 ((is-list? y)y)
-	 (else (interp0 
-		(list (func-of y) (eva-para exp env))
+	 ((is-list? y)(type-error x y))
+	 (else (*application 
+		(cons (func-of y) (eva-para exp env))
 		(table-of y)))))
-       (else y)))))
+       (else (type-error x y))))))
 (define *application
   (lambda(exp env)
     (cond
      ((eq? (caar exp) 'lambda)
       (interp0 (body-of exp) 
-	       (extend-env (formals-of exp) (eva-para exp env0) env)))
+	       (extend-env (formals-of exp) (eva-para exp env) env)))
      (else (let ((v1 (interp0 (car exp)env))
                  (v2 (second exp)))
-             (interp0 (list (func-of v1) (interp v2)) (table-of v1)))))))
+             (interp0 (list (func-of v1) (eva-para v2 env)) (table-of v1)))))))
 
 (define body-of caddar)
 (define formals-of caadar)
