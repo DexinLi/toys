@@ -94,10 +94,10 @@
     (cond
      ((eq? (caar exp) 'lambda)
       (interp0 (body-of exp) 
-	       (extend-env (formals-of exp) (eva-para exp env) env)))
+	       (extend-env (formals-of exp) (interp0 exp) env)))
      (else (let ((v1 (interp0 (car exp)env))
                  (v2 (second exp)))
-             (interp0 (list (func-of v1) (eva-para v2 env)) (table-of v1)))))))
+             (interp0 (list (func-of v1) (interp0 v2)) (table-of v1)))))))
 
 (define body-of caddar)
 (define formals-of caadar)
