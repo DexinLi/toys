@@ -17,7 +17,7 @@
 	(cond
 	 ((list? x)(*application exp env))
 	 ((eq? 'lambda x) (closure exp env))
-     	 (else (atom-to-action x exp env)))))
+	 (else (atom-to-action x exp env)))))
      (else (atom-to-value exp env)))))
 (define interp
   (lambda (exp)
@@ -37,30 +37,6 @@
      ((eq? x 'eq?)(eq? (interp0(second exp)env) (interp0(third exp)env)))
      ((eq? x 'cond)(ev-cond (cdr exp)env))
      (else (list-operate x exp env)))))
-
-
-(define atom-to-value
-  (lambda (x env)
-    (cond
-     ((number? x)x)
-     (else(look-up x env)))))
-
-
-;;;;;;;;;;;;;;;;;;;;;functions deal with quote expressions;;;;;;;;;;;;;;;;;;;;;;
-
-
-(define add-type
-  (lambda (ls)
-    (list 'quote ls)))
-(define interp1
-  (lambda(exp env)
-    (data-of (interp0 exp env))))
-(define data-of
-  (lambda(x)
-    (cond
-      ((list? x)(cadr x))
-      (else x))))
-
 (define is-list?
   (lambda(x)
     (eq? (car x) 'quote)))
@@ -76,28 +52,26 @@
      ((eq? x 'symbol?)(symbol?(interp1 (second exp)env)))
      (else (symbol-to-action x exp env)))))
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;functions deal with applications;;;;;;;;;;;;;;;
 (define symbol-to-action
   (lambda (x exp env)
     (let ((y (look-up x env)))
       (cond
        ((list? y)
         (cond
-	 ((is-list? y)(type-error x y))
-	 (else (*application 
-		(cons (func-of y) (eva-para exp env))
+	 ((is-list? y)y)
+	 (else (interp0 
+		(list (func-of y) (eva-para exp env))
 		(table-of y)))))
-       (else (type-error x y))))))
+       (else y)))))
 (define *application
   (lambda(exp env)
     (cond
      ((eq? (caar exp) 'lambda)
       (interp0 (body-of exp) 
-	       (extend-env (formals-of exp) (interp0 exp) env)))
+	       (extend-env (formals-of exp) (eva-para exp env0) env)))
      (else (let ((v1 (interp0 (car exp)env))
                  (v2 (second exp)))
-             (interp0 (list (func-of v1) (interp0 v2)) (table-of v1)))))))
+             (interp0 (list (func-of v1) (interp v2)) (table-of v1)))))))
 
 (define body-of caddar)
 (define formals-of caadar)
@@ -106,7 +80,46 @@
     (interp0 (cadr exp) env)))
 
 
-;;;;;;;;;;;;;;;;;functions deal with symbol table;;;;;;;;;;;;;;;
+;;deal with the cond and let situation
+(define branch-of car)
+(define question-of car)
+(define answer-of cadr)
+
+(define ev-cond
+  (lambda (cond-body env)
+    (let((x (branch-of cond-body)))
+      (cond
+       ((eq? (question-of x) 'else) (interp0 (answer-of x)env))
+       ((interp0 (question-of x)env) (interp0 (answer-of x)env))
+       (else (ev-cond (cdr cond-body) env))))))
+
+(define binders-of car)
+
+(define name-of
+  (lambda(x)
+    (list x)))
+(define val-of cdar)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define add-type
+  (lambda (ls)
+    (list 'quote ls)))
+(define interp1
+  (lambda(exp env)
+    (data-of (interp0 exp env))))
+(define data-of
+  (lambda(x)
+    (cond
+      ((list? x)(cadr x))
+      (else x))))
+(define atom-to-value
+  (lambda (x env)
+    (cond
+     ((number? x)x)
+     ((eq? x #t)#t)
+     ((eq? x #f)#f)
+     (else(look-up x env)))))
 (define env0 '(()()))
 (define extend-env
   (lambda (var val env)
