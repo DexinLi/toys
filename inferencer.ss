@@ -274,13 +274,11 @@
 ; => (t0 -> t0)
 
 ; incorrect programs
-
+(infer '(lambda (f) (f f)))
 ;; infer: trying to apply function to wrong type argument:
 ;;  - function:      f
 ;;  - function type: (t0 -> t1)
-;;  - expected type: t0
 ;;  - argument type: (t0 -> t1)
-;;  - argument: f
 
 (infer '(if (zero? 1) #t 1))
 ;; infer: branches of conditional must have the same type
@@ -292,6 +290,4 @@
 ;; infer: trying to apply function to wrong type argument:
 ;;  - function:      (lambda (x) ((+ 1) x))
 ;;  - function type: (int -> int)
-;;  - expected type: int
 ;;  - argument type: string
-;;  - argument: hello
