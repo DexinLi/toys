@@ -7,3 +7,5 @@ toys
 
 
   interp-lambda.ss --A call-by-value interpreter can interpret lambda calculus completely
+
+  inferencer.ss  --A type inferencer for lambda calculus

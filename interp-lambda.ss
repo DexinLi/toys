@@ -2,22 +2,23 @@
 (define second cadr)
 (define third caddr)
 
-;;;;;functions to deal with closure
+
 (define closure
   (lambda (exp env)
-    (list env exp)))     ;;considered the data-of function
+    (list env exp)))
 (define table-of car)
 (define func-of cadr)
+
 
 (define interp0
   (lambda (exp env)
     (cond
      ((list? exp)
       (let((x (car exp)))
-	(cond
-	 ((list? x)(*application exp env))
-	 ((eq? 'lambda x) (closure exp env))
-	 (else (atom-to-action x exp env)))))
+        (cond
+         ((list? x)(*application exp env))
+         ((eq? 'lambda x) (closure exp env))
+         (else (atom-to-action x exp env)))))
      (else (atom-to-value exp env)))))
 (define interp
   (lambda (exp)
@@ -46,11 +47,12 @@
      ((eq? x 'car)(car(interp1(second exp)env)))
      ((eq? x 'cdr)(cdr(interp1(second exp)env)))
      ((eq? x 'cons)(add-type(cons(interp1 (second exp) env)
-				 (interp1(third exp)env))))
+                                 (interp1(third exp)env))))
      ((eq? x 'pair?)(pair? (interp1 (second exp) env)))
      ((eq? x 'list?)(list?(interp1(second exp) env)))
      ((eq? x 'symbol?)(symbol?(interp1 (second exp)env)))
      (else (symbol-to-action x exp env)))))
+
 
 (define symbol-to-action
   (lambda (x exp env)
@@ -58,20 +60,21 @@
       (cond
        ((list? y)
         (cond
-	 ((is-list? y)y)
-	 (else (interp0 
-		(list (func-of y) (eva-para exp env))
-		(table-of y)))))
+         ((is-list? y)y)
+         (else (interp0 
+                (list (func-of y) (eva-para exp env))
+                (table-of y)))))
        (else y)))))
 (define *application
   (lambda(exp env)
     (cond
      ((eq? (caar exp) 'lambda)
       (interp0 (body-of exp) 
-	       (extend-env (formals-of exp) (eva-para exp env0) env)))
+               (extend-env (formals-of exp) (eva-para exp env) env)))
      (else (let ((v1 (interp0 (car exp)env))
                  (v2 (second exp)))
              (interp0 (list (func-of v1) (interp v2)) (table-of v1)))))))
+
 
 (define body-of caddar)
 (define formals-of caadar)
@@ -80,10 +83,12 @@
     (interp0 (cadr exp) env)))
 
 
-;;deal with the cond and let situation
+
+;;===============conditions=================================
 (define branch-of car)
 (define question-of car)
 (define answer-of cadr)
+
 
 (define ev-cond
   (lambda (cond-body env)
@@ -93,14 +98,11 @@
        ((interp0 (question-of x)env) (interp0 (answer-of x)env))
        (else (ev-cond (cdr cond-body) env))))))
 
-(define binders-of car)
 
-(define name-of
-  (lambda(x)
-    (list x)))
-(define val-of cdar)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (define add-type
   (lambda (ls)
@@ -128,18 +130,21 @@
   (lambda (var env)
     (define look-up-help
       (lambda (name var-ls val-ls)
-	(cond
-	 ((null? var-ls)(value-error x))
-	 ((eq? var (car var-ls))
-	  (car val-ls))
-	 (else(look-up-help var (cdr var-ls)(cdr val-ls))))))
+        (cond
+         ((null? var-ls)(value-error x))
+         ((eq? var (car var-ls))
+          (car val-ls))
+         (else(look-up-help var (cdr var-ls)(cdr val-ls))))))
     (look-up-help var (first env)(second env))))
 
+
 ;;= = == = = = = = = = == test= = = = = = = = = = = = = = = =
-;;(interp '((lambda(x)(cons x '()))'x))
-;;(interp '((lambda(x)(x 1))(lambda(x)(+ 100 x))))
-;;(interp '((lambda (x)
-;;            (cond
-;;              ((eq? x 1)1)
-;;              (else 0)))1))
-;;(interp '((((lambda(x)(lambda(y)(lambda(x) x)))1)2)3))
+(interp '((lambda(x)(cons x '()))'x))
+(interp '((lambda(x)(x 1))(lambda(x)(+ 100 x))))
+(interp '((lambda (x)
+            (cond
+              ((eq? x 1)1)
+              (else 0)))1))
+(interp '((((lambda(x)(lambda(y)(lambda(x) x)))1)2)3))
+
+
