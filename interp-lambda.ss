@@ -9,7 +9,6 @@
 (define table-of car)
 (define func-of cadr)
 
-
 (define interp0
   (lambda (exp env)
     (cond
